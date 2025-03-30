@@ -1,0 +1,167 @@
+Starting an Exploratory Data Analysis (EDA) project involves several structured steps. Here’s a roadmap to help you get started efficiently:
+
+---
+Step 1: Define the Problem Statement 
+ 
+Before jumping into the code, understand why you're doing the EDA.  
+- What insights do you need from the data?  
+- What kind of analysis will be useful for decision-making?  
+- Are you preparing data for Machine Learning?  
+---
+Step 2: Import Required Libraries
+
+Start by importing essential libraries in Python:  
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+---
+Step 3: Load the Dataset
+ 
+Load your dataset from a CSV file, Excel, or SQL database.  
+df = pd.read_csv("your_dataset.csv")  # Change file format if needed
+
+Check the first few rows:  
+df.head()  # Displays first 5 rows
+---
+Step 4: Understand the Data Structure
+  
+Examine basic details of the dataset:
+df.info()   # Check column data types and missing values
+df.describe()  # Summary statistics for numerical columns
+df.shape  # Get the number of rows and columns
+df.columns  # List all column names
+---
+Step 5: Handle Missing Values
+ 
+Find missing values:
+df.isnull().sum()  # Count missing values in each column
+
+Handle them by:  
+- Dropping: df.dropna(inplace=True)  
+- Filling: df.fillna(df.mean(), inplace=True)  (You can fill with median or mode)
+---
+Step 6: Check for Duplicates 
+
+df.duplicated().sum()  # Count duplicate rows
+df.drop_duplicates(inplace=True)  # Remove duplicates
+---
+Step 7: Data Cleaning
+
+- Convert incorrect data types (df['col'] = df['col'].astype(int))  
+- Remove irrelevant columns (df.drop(columns=['col_name'], inplace=True))  
+- Standardize text formats (df['col'] = df['col'].str.lower())                 
+---
+Step 8: Perform Univariate Analysis (see below as well)
+ 
+For numerical columns:
+df.hist(figsize=(12, 6))  # Histogram for numerical distribution
+plt.show()
+
+For categorical columns:
+sns.countplot(x='category_column', data=df)
+plt.xticks(rotation=90)
+plt.show()
+---
+Step 9: Perform Bivariate & Multivariate Analysis (see below as well)
+ 
+Find relationships between variables:
+sns.pairplot(df)  # Scatter plots between numerical columns
+plt.show()
+
+Check correlation:
+plt.figure(figsize=(10, 6))
+sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
+plt.show()
+---
+Step 10: Detect & Handle Outliers
+
+Use boxplots to find outliers:
+plt.figure(figsize=(12,6))
+sns.boxplot(data=df)
+plt.xticks(rotation=90)
+plt.show()
+
+Handle outliers using IQR method:
+Q1 = df['col'].quantile(0.25)
+Q3 = df['col'].quantile(0.75)
+IQR = Q3 - Q1
+df = df[(df['col'] >= (Q1 - 1.5 * IQR)) & (df['col'] <= (Q3 + 1.5 * IQR))]
+---
+Step 11: Feature Engineering (If Needed)  
+- Create new features from existing ones  
+- Encode categorical variables (`pd.get_dummies(df, drop_first=True)`)  
+- Normalize/Scale numerical features (`from sklearn.preprocessing import StandardScaler`)  
+  {standardization and normalization}
+---
+Step 12: Summarize Findings 
+- Write key insights from your analysis  
+- Save visualizations for reporting  
+- If preparing data for ML, ensure it's clean and ready  
+---
+
+EDA is all about understanding the dataset before making decisions. Each dataset may require different techniques.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1. Categorical Analysis in Python
+
+a) Univariate Analysis (One Variable)
+- Focuses on summarizing a single categorical variable.
+- Methods:
+  - Frequency Count: df['Category'].value_counts()
+  - Percentage Distribution: df['Category'].value_counts(normalize=True) * 100
+  - Bar Plot: sns.countplot(x='Category', data=df)
+  - Pie Chart: df['Category'].value_counts().plot.pie(autopct="%1.1f%%")
+
+b) Bivariate Analysis (Two Variables)
+- Analyzes the relationship between two categorical variables.
+- Methods:
+  - Crosstab (Contingency Table): pd.crosstab(df['Category1'], df['Category2'])
+  - Stacked Bar Plot: pd.crosstab(df['Category1'], df['Category2']).plot(kind='bar', stacked=True)
+  - Chi-Square Test: To test dependence between two categorical variables:
+    ```python
+    from scipy.stats import chi2_contingency
+    chi2_contingency(pd.crosstab(df['Category1'], df['Category2']))
+    ```
+
+c) Multivariate Analysis (More than Two Variables)
+- Examines relationships between multiple categorical variables.
+- Methods:
+  - Heatmap of Crosstab Data: sns.heatmap(pd.crosstab(df['Category1'], df['Category2']), annot=True, cmap='coolwarm')
+  - Clustered Bar Charts using seaborn:
+    ```python
+    sns.catplot(x='Category1', hue='Category2', col='Category3', kind='count', data=df)
+    ```
+  - Multiple Correspondence Analysis (MCA): Used for dimensionality reduction in categorical data.
+
+---
+
+2. Numeric Analysis in Python
+a) Summary Statistics (Univariate Analysis)
+- Describes the distribution of a numeric variable.
+- Methods:
+  - Basic Statistics: df['NumericColumn'].describe()
+  - Skewness & Kurtosis:
+    ```python
+    df['NumericColumn'].skew()  # Measure of asymmetry
+    df['NumericColumn'].kurtosis()  # Measure of tailedness
+    ```
+  - Histogram: sns.histplot(df['NumericColumn'], bins=30, kde=True)
+  - Boxplot: sns.boxplot(x=df['NumericColumn']) (Detects outliers)
+
+b) Correlation (Bivariate & Multivariate Analysis)
+- Measures the relationship between two or more numeric variables.
+- Methods:
+  - Pearson Correlation (Linear Relation): df.corr(method='pearson')
+  - Spearman Correlation (Monotonic Relation): df.corr(method='spearman')
+  - Heatmap for Correlation Matrix: sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+  - Scatterplot: sns.scatterplot(x='Numeric1', y='Numeric2', data=df)
+
+---
+
+Summary
+| Analysis Type        | Categorical Methods                    | Numeric Methods                   |
+|----------------------|----------------------------------------|-----------------------------------|
+| Univariate           | value_counts(), countplot(), pie chart | describe(), histplot(), boxplot() |
+| Bivariate            | crosstab(), barplot(), Chi-Square Test | corr(), scatterplot()             | 
+| Multivariate         | catplot(), heatmap()                   | heatmap(corr()), pairplot()       |
